@@ -72,11 +72,11 @@ const formatDuration = (seconds) => {
   return `${Math.floor(seconds / 60)}m ${String(Math.ceil(seconds % 60)).padStart(2, '0')}s`;
 };
 
-function message(text, kind = 'info', { sticky = false } = {}) {
+function message(text, kind = 'info', { sticky = false, retryable = false } = {}) {
   const node = document.createElement('div');
   node.className = `message ${kind}`;
   node.innerHTML = text;
-  if (kind === 'error') {
+  if (retryable) {
     const retry = document.createElement('button');
     retry.textContent = 'Retry';
     retry.style.marginLeft = '10px';
@@ -332,7 +332,7 @@ async function play() {
     state.phase = 'ready';
     elements.play.disabled = false;
     elements.play.textContent = original;
-    message(`The machine did not start: ${error.message}`, 'error', { sticky: true });
+    message(`The machine did not start: ${error.message}`, 'error', { sticky: true, retryable: true });
     if (error.code === 'BAD_BIOS_SIZE') promptForBios();
   }
 }
@@ -450,8 +450,7 @@ async function boot() {
   const persistence = await requestPersistence();
   if (!persistence.persisted && persistence.reason === 'denied') {
     message(
-      'The browser would not grant persistent storage, so the disc cache may be evicted when space runs low. Export your memory card to keep progress safe.',
-      'error',
+      'The browser did not grant persistent storage, so the cached disc may be evicted when space runs low. Your memory card can always be exported from Settings.',
     );
   }
   await updateStorageFootnote();
@@ -472,7 +471,7 @@ async function boot() {
     await hydrate();
   } catch (error) {
     state.phase = 'error';
-    message(`Downloading the disc failed: ${error.message}`, 'error', { sticky: true });
+    message(`Downloading the disc failed: ${error.message}`, 'error', { sticky: true, retryable: true });
     setProgress(0, 'Stopped');
     return;
   }
@@ -489,6 +488,6 @@ boot().catch((error) => {
   message(
     `The shell could not reach its server (${error.message}). Start it with <code>npx psxpress serve &lt;disc&gt;</code> and reload.`,
     'error',
-    { sticky: true },
+    { sticky: true, retryable: true },
   );
 });

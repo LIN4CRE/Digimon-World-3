@@ -40,7 +40,8 @@
 
 .stage .fill {
   grid-column: 1 / -1;
-  height: 3px;
+  height: 4px;
+  margin-top: 2px;
   background: #1b2130;
   border-radius: 99px;
   overflow: hidden;
