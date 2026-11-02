@@ -1,0 +1,8 @@
+node_modules/
+builds/
+web/cores/*.wasm
+web/cores/ps1-core.js
+web/cores/CORE.json
+tests/e2e/last-run.png
+*.log
+.DS_Store

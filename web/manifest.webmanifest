@@ -1,0 +1,17 @@
+{
+  "name": "PSXpress",
+  "short_name": "PSXpress",
+  "description": "Instant-play PlayStation games in the browser, from your own disc image.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b0d12",
+  "theme_color": "#0b0d12",
+  "icons": [
+    {
+      "src": "/assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

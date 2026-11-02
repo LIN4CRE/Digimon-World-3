@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#0b0d12" />
+    <title>PSXpress</title>
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/assets/icon.svg" type="image/svg+xml" />
+    <style>
+      /* Critical shell: painted before any script runs, so the page is never blank. */
+      :root {
+        color-scheme: dark;
+        --bg: #0b0d12;
+        --panel: #12161f;
+        --line: #232a38;
+        --text: #e8edf7;
+        --muted: #8a93a6;
+        --accent: #ffb648;
+        --accent-2: #5ad1ff;
+        --good: #4ade80;
+        --bad: #ff6b6b;
+        --mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+      }
+      * { box-sizing: border-box; }
+      html, body { height: 100%; margin: 0; }
+      body {
+        background: radial-gradient(1200px 700px at 15% -10%, #1a2130 0%, var(--bg) 55%) fixed;
+        color: var(--text);
+        font-family: ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      #app { min-height: 100%; display: flex; flex-direction: column; }
+      #topbar {
+        display: flex; align-items: center; gap: 16px; padding: 12px 20px;
+        border-bottom: 1px solid var(--line); background: rgba(11, 13, 18, 0.72);
+        backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 10;
+      }
+      .brand { font-family: var(--mono); font-weight: 700; letter-spacing: 0.14em; font-size: 13px; text-transform: uppercase; }
+      .brand span { color: var(--accent); }
+      #disc-meta { color: var(--muted); font-family: var(--mono); font-size: 12px; margin-left: auto; text-align: right; }
+      main { flex: 1; display: flex; flex-direction: column; }
+      #stage-screen { width: min(880px, 100%); margin: 0 auto; padding: 40px 20px 60px; }
+      h1 { font-size: clamp(28px, 5vw, 44px); margin: 0 0 6px; letter-spacing: -0.02em; }
+      #game-sub { color: var(--muted); font-family: var(--mono); font-size: 13px; }
+      .bar { height: 8px; background: #1b2130; border-radius: 99px; overflow: hidden; margin: 26px 0 10px; }
+      .bar > div { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--accent-2)); transition: width 120ms linear; }
+      #progress-line { font-family: var(--mono); font-size: 12px; color: var(--muted); display: flex; justify-content: space-between; gap: 12px; }
+      #stages { list-style: none; padding: 0; margin: 26px 0 0; display: grid; gap: 8px; }
+      .stage { display: grid; grid-template-columns: 26px 1fr auto; gap: 10px; align-items: center; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); }
+      .stage .dot { width: 10px; height: 10px; border-radius: 50%; background: #2b3446; margin: 0 auto; }
+      .stage[data-state="active"] .dot { background: var(--accent); box-shadow: 0 0 0 4px rgba(255, 182, 72, 0.14); }
+      .stage[data-state="done"] .dot { background: var(--good); }
+      .stage .label { font-size: 14px; }
+      .stage .label small { display: block; color: var(--muted); font-size: 11.5px; margin-top: 2px; }
+      .stage .size { font-family: var(--mono); font-size: 11.5px; color: var(--muted); }
+      #actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
+      button {
+        font: inherit; color: var(--text); background: #1a2130; border: 1px solid var(--line);
+        border-radius: 10px; padding: 11px 18px; cursor: pointer; transition: transform 60ms ease, background 120ms ease;
+      }
+      button:hover:not(:disabled) { background: #222b3d; }
+      button:active:not(:disabled) { transform: translateY(1px); }
+      button:disabled { opacity: 0.45; cursor: not-allowed; }
+      button.primary { background: linear-gradient(180deg, #ffc46a, #f5a72f); color: #241a05; border-color: #ffd79a; font-weight: 650; }
+      #messages { margin-top: 18px; display: grid; gap: 8px; }
+      .message { border: 1px solid var(--line); border-left: 3px solid var(--accent); background: var(--panel); padding: 10px 12px; border-radius: 8px; font-size: 13px; }
+      .message.error { border-left-color: var(--bad); }
+      .message.good { border-left-color: var(--good); }
+      .message code { font-family: var(--mono); font-size: 12px; color: var(--accent-2); }
+      #player { position: relative; flex: 1; display: flex; align-items: center; justify-content: center; background: #000; min-height: 60vh; }
+      #screen { width: 100%; height: 100%; display: block; image-rendering: pixelated; }
+      #hud {
+        position: absolute; left: 12px; bottom: 12px; display: flex; gap: 14px; padding: 8px 12px;
+        background: rgba(6, 8, 12, 0.72); border: 1px solid var(--line); border-radius: 10px;
+        font-family: var(--mono); font-size: 11.5px; color: var(--muted); pointer-events: none;
+      }
+      dialog { border: 1px solid var(--line); border-radius: 14px; background: var(--panel); color: var(--text); padding: 22px; width: min(560px, calc(100vw - 32px)); }
+      dialog::backdrop { background: rgba(3, 5, 9, 0.72); backdrop-filter: blur(3px); }
+      dialog h2 { margin: 0 0 8px; font-size: 18px; }
+      dialog p { color: var(--muted); font-size: 13.5px; line-height: 1.55; }
+      dialog .row { display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px; flex-wrap: wrap; }
+      label.field { display: grid; gap: 6px; margin: 14px 0; font-size: 13px; }
+      input[type="file"], select { font: inherit; color: var(--text); background: #0e131c; border: 1px solid var(--line); border-radius: 8px; padding: 10px; }
+      footer { padding: 14px 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: 11.5px; font-family: var(--mono); display: flex; gap: 18px; flex-wrap: wrap; }
+      .spinner { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.18); border-top-color: var(--accent); border-radius: 50%; animation: spin 700ms linear infinite; display: inline-block; vertical-align: -2px; }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      @media (prefers-reduced-motion: reduce) { .spinner { animation: none; } }
+    </style>
+    <link rel="stylesheet" href="/css/app.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header id="topbar">
+        <div class="brand">PSX<span>press</span></div>
+        <div id="disc-meta">starting…</div>
+      </header>
+
+      <main>
+        <section id="stage-screen" aria-live="polite">
+          <h1 id="game-title">Preparing…</h1>
+          <div id="game-sub">Reading the disc manifest</div>
+
+          <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" id="progress-bar"><div id="bar-fill"></div></div>
+          <div id="progress-line">
+            <span id="progress-text">Contacting the local server…</span>
+            <span id="progress-rate"></span>
+          </div>
+
+          <ol id="stages"></ol>
+
+          <div id="actions">
+            <button id="play" class="primary" disabled>Play</button>
+            <button id="btn-settings">Settings</button>
+            <button id="btn-clear">Clear cached downloads</button>
+          </div>
+
+          <div id="messages"></div>
+        </section>
+
+        <section id="player" hidden>
+          <canvas id="screen" width="256" height="240"></canvas>
+          <div id="hud">
+            <span id="hud-fps">— fps</span>
+            <span id="hud-audio">—</span>
+            <span id="hud-mode">—</span>
+            <span id="hud-hint">Esc pause · Tab fast-forward · F2 save · F3 load</span>
+          </div>
+        </section>
+      </main>
+
+      <footer>
+        <span id="foot-cache">cache: —</span>
+        <span id="foot-storage">storage: —</span>
+        <span id="foot-disc">disc: —</span>
+        <span id="foot-sw">service worker: —</span>
+      </footer>
+    </div>
+
+    <dialog id="bios-dialog">
+      <h2>A BIOS image is needed</h2>
+      <p>
+        The PlayStation boots through a BIOS. Use your own 512&nbsp;KiB image (for example a dump from a console you own),
+        or the free <strong>OpenBIOS</strong> replacement. The file is read in this browser, stored in IndexedDB and
+        never uploaded anywhere.
+      </p>
+      <label class="field">
+        BIOS image (512 KiB)
+        <input type="file" id="bios-file" accept=".bin,.rom,.BIN" />
+      </label>
+      <p id="bios-status" hidden></p>
+      <div class="row">
+        <button id="bios-cancel">Not now</button>
+      </div>
+    </dialog>
+
+    <dialog id="settings-dialog">
+      <h2>Settings</h2>
+      <label class="field">
+        Scaling
+        <select id="setting-scale">
+          <option value="integer">Integer (sharpest)</option>
+          <option value="fit">Fit the window</option>
+        </select>
+      </label>
+      <label class="field">
+        Volume
+        <input type="range" id="setting-volume" min="0" max="100" value="80" />
+      </label>
+      <p id="settings-storage"></p>
+      <div class="row">
+        <button id="btn-export-card">Export memory card</button>
+        <button id="btn-import-card">Import memory card</button>
+        <button id="settings-close" class="primary">Done</button>
+      </div>
+      <input type="file" id="import-card-file" accept=".mcr,.mcd,.bin" hidden />
+    </dialog>
+
+    <script type="module" src="/js/app.js"></script>
+  </body>
+</html>

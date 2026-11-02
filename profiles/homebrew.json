@@ -1,0 +1,15 @@
+{
+  "id": "homebrew",
+  "title": "Homebrew disc",
+  "notes": [
+    "Used by the tests and by `psxpress pack`. A disc built from a single PS-EXE has",
+    "nothing to stage: SYSTEM.CNF and the executable are the whole thing."
+  ],
+  "stages": [
+    { "id": "core", "label": "Core runtime", "detail": "SYSTEM.CNF and the executable" },
+    { "id": "content", "label": "Remaining content", "detail": "Anything else on the disc" }
+  ],
+  "stageRules": [
+    { "match": "^(SYSTEM\\.CNF|.*\\.EXE)$", "stage": "core" }
+  ]
+}

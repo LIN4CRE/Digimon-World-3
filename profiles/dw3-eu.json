@@ -1,0 +1,35 @@
+{
+  "id": "dw3-eu",
+  "title": "Digimon World 2003 (Europe)",
+  "serial": "SLES-03936",
+  "bootExecutable": "SLES_039.36",
+  "notes": [
+    "Stage rules come from the roles the decompilation documents for each overlay:",
+    "STDWTITL is the title screen and the opening movies; FIELDSTG is the field mode",
+    "the player walks around in; CNTY_SEL is the country select; STAGSLCT is the debug",
+    "stage select; the WSTAG### overlays are the individual stages that load on top of",
+    "FIELDSTG. AAA/DAT, AAA/PRO and AAA/STR are only reachable through the ISO 9660",
+    "path table, which the analyser merges in.",
+    "The first-playable set is a starting hypothesis, not a measurement: it keeps the",
+    "title, the field engine, country select and the first ten stages together so that",
+    "the first area and the menus around it arrive before 250 movies and stage programs.",
+    "Run `psxpress analyze <disc> --profile profiles/dw3-eu.json` and check the",
+    "`unmatched`/warnings output against your disc before trusting the split."
+  ],
+  "stages": [
+    { "id": "core", "label": "Core runtime", "detail": "SYSTEM.CNF and the executable" },
+    { "id": "frontend", "label": "Front end", "detail": "Title screen, name entry, debug select" },
+    { "id": "first-playable", "label": "First playable", "detail": "Field engine, country select, opening stages" },
+    { "id": "content", "label": "Remaining content", "detail": "Every other stage, movie and data file" }
+  ],
+  "stageRules": [
+    { "match": "^(SYSTEM\\.CNF|SLES_039\\.36)$", "stage": "core" },
+    { "match": "^AAA/PRO/(STDWTITL|STDGNAME|STPLNMET|STAGSLCT)\\.PRO$", "stage": "frontend" },
+    { "match": "^AAA/PRO/(FIELDSTG|CNTY_SEL|STSTATUS|STITSHOP|STGTRAIN|STGMCARD|STCRDDEK|STCRDABM|STCRDSHP|STGDGLAB)\\.PRO$", "stage": "first-playable" },
+    { "match": "^AAA/PRO/WSTAG00[0-9]\\.PRO$", "stage": "first-playable" }
+  ],
+  "disc": {
+    "mode": "MODE2/2352",
+    "sectorCount": 294281
+  }
+}

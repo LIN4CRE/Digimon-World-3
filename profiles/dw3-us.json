@@ -1,0 +1,27 @@
+{
+  "id": "dw3-us",
+  "title": "Digimon World 3 (USA)",
+  "serial": "SLUS-01436",
+  "bootExecutable": "SLUS_014.36",
+  "notes": [
+    "The same shape as the European profile: the USA release shares the overlay",
+    "names, so the only differences are the executable name and the serial.",
+    "The static recompilation project targets this release; the matching",
+    "decompilation and its native port target the European one."
+  ],
+  "stages": [
+    { "id": "core", "label": "Core runtime", "detail": "SYSTEM.CNF and the executable" },
+    { "id": "frontend", "label": "Front end", "detail": "Title screen, name entry, debug select" },
+    { "id": "first-playable", "label": "First playable", "detail": "Field engine, country select, opening stages" },
+    { "id": "content", "label": "Remaining content", "detail": "Every other stage, movie and data file" }
+  ],
+  "stageRules": [
+    { "match": "^(SYSTEM\\.CNF|SLUS_014\\.36)$", "stage": "core" },
+    { "match": "^AAA/PRO/(STDWTITL|STDGNAME|STPLNMET|STAGSLCT)\\.PRO$", "stage": "frontend" },
+    { "match": "^AAA/PRO/(FIELDSTG|CNTY_SEL|STSTATUS|STITSHOP|STGTRAIN|STGMCARD|STCRDDEK|STCRDABM|STCRDSHP|STGDGLAB)\\.PRO$", "stage": "first-playable" },
+    { "match": "^AAA/PRO/WSTAG00[0-9]\\.PRO$", "stage": "first-playable" }
+  ],
+  "disc": {
+    "mode": "MODE2/2352"
+  }
+}

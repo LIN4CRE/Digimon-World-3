@@ -1,0 +1,111 @@
+/* Everything here is an enhancement: the critical shell lives in index.html so
+   the page paints before this file arrives. */
+
+#player:not([hidden]) {
+  padding: 0;
+}
+
+#player canvas {
+  outline: none;
+  touch-action: none;
+  background: #000;
+}
+
+#player:fullscreen {
+  background: #000;
+}
+
+#stage-screen {
+  animation: rise 260ms ease both;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.stage[data-state='active'] {
+  border-color: #3a4a68;
+}
+
+.stage[data-state='done'] .label small {
+  color: #5d6b85;
+}
+
+.stage .fill {
+  grid-column: 1 / -1;
+  height: 3px;
+  background: #1b2130;
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.stage .fill > i {
+  display: block;
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  transition: width 140ms linear;
+}
+
+button.ghost {
+  background: transparent;
+}
+
+button.danger {
+  border-color: #5a2a2a;
+  color: #ffb3b3;
+}
+
+kbd {
+  font-family: var(--mono);
+  font-size: 11px;
+  border: 1px solid var(--line);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  padding: 1px 5px;
+  color: var(--muted);
+}
+
+#messages .message a {
+  color: var(--accent-2);
+}
+
+#hud span:last-child {
+  color: #5f6b83;
+}
+
+/* The title card is the one piece of decoration the shell carries. */
+#stage-screen::before {
+  content: '';
+  display: block;
+  width: 46px;
+  height: 46px;
+  margin-bottom: 18px;
+  border-radius: 12px;
+  background:
+    linear-gradient(135deg, rgba(255, 182, 72, 0.9), rgba(90, 209, 255, 0.85)),
+    #1a2130;
+  box-shadow: 0 10px 30px rgba(255, 182, 72, 0.18);
+}
+
+@media (max-width: 640px) {
+  #topbar {
+    padding: 10px 14px;
+  }
+  #disc-meta {
+    font-size: 10.5px;
+  }
+  #stage-screen {
+    padding: 26px 14px 40px;
+  }
+  #actions button {
+    flex: 1 1 auto;
+  }
+}
