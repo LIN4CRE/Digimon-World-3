@@ -1,0 +1,26 @@
+{
+  "name": "psxpress",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Instant-play PlayStation web platform: analyse a disc, stream it in stages, cache it, play it, keep the saves.",
+  "license": "GPL-3.0-only",
+  "engines": {
+    "node": ">=18"
+  },
+  "bin": {
+    "psxpress": "./tools/psxpress.mjs"
+  },
+  "scripts": {
+    "fetch:core": "node scripts/fetch-core.mjs",
+    "postinstall": "node scripts/fetch-core.mjs",
+    "doctor": "node tools/psxpress.mjs doctor",
+    "serve": "node tools/psxpress.mjs serve",
+    "test": "node --test tests/unit/*.test.mjs",
+    "test:e2e": "node tests/e2e/run.mjs"
+  },
+  "dependencies": {
+    "@davidmaniliuc/substation": "^0.1.0"
+  },
+  "devDependencies": {}
+}
