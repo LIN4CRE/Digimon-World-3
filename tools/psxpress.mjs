@@ -13,14 +13,13 @@
  */
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
 
 const { openDiscFile, openDiscBuffer, analyzeDisc, buildIso } = await import(path.join(ROOT, 'packages/disc/src/index.js'));
-const { startServer } = await import(path.join(ROOT, 'packages/server/src/server.js'));
+const { startServer, discIdFor } = await import(path.join(ROOT, 'packages/server/src/server.js'));
 
 function usage(exitCode = 0) {
   console.log(`psxpress — instant-play PlayStation web platform
@@ -161,10 +160,9 @@ async function serve() {
   const profile = await loadProfile();
   const image = await openDiscFile(discPath);
   const manifest = await analyzeDisc(image, { profile });
-  const discId = createHash('sha256')
-    .update(`${image.sectorCount}:${image.sectorSize}:${manifest.game.serial ?? ''}`)
-    .digest('hex')
-    .slice(0, 16);
+  // The id must depend on the image contents, not just its size, or two
+  // different discs would share one cache entry.
+  const discId = await discIdFor(image);
   const fullManifest = {
     ...manifest,
     disc: { ...manifest.disc, cueText: image.cueText ?? null },
