@@ -52,6 +52,22 @@ One repository, three threads of work. This file is the running record; `docs/VE
 - **BO1**: no licence in the source repository → no code taken, no build attempted, no WebAssembly claim made. See
   `docs/BO1.md`.
 
+### Fixes after the first browser screenshot
+
+- Stage bars now read 100% for a completed stage (checked by computed style, not by eye).
+- Only genuinely retryable failures offer a Retry button; the persistent-storage notice is information.
+- The disc id is derived from the image's first 64 KiB (`discIdFor`), not from its sector count, so two different
+  discs cannot share one cache entry. Caught by comparing two packs: both had reported `13460204a6e04be2`.
+
+### Not built here, and why
+
+- **Native Windows port** — `docs/DW3.md` lists the three existing DW3 projects (MIT decomp, MIT native port,
+  GPL-3.0 static recomp). None was built: this container has no CMake, no MSVC, no SDL2, and building them needs a
+  Windows toolchain and the user's disc. Their licences, supported releases and platforms are recorded instead of
+  guessed at.
+- **Engine-level BO1 mods** — `docs/BO1.md`: no licence in the source repository, Windows/MSVC/DirectX only.
+  Implementation there would be a licence violation, so the assessment and the porting blockers are the deliverable.
+
 ## Next
 
 1. Run `psxpress verify` with a real BIOS and a real disc; record first-picture frame and FPS in `docs/VERIFICATION.md`.
